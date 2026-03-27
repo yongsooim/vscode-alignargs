@@ -1,62 +1,50 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {DoAlign} from './implement/AlignArgs';
 import { Config } from './class/Config';
+import { DoAlign } from './implement/AlignArgs';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-
-	//	vscode.ConfigurationTarget.Global.toString.arguments
-
-	let disposable = vscode.commands.registerCommand('alignargs.alignargs', () => {
-		// The code you place here will be executed every time your command is executed
-
-		var	wsConfig = vscode.workspace.getConfiguration("alignargs");
-
-		var alignDecimal: string|undefined = wsConfig.get('alignDecimal');
-		var alignNonDecimal: string|undefined = wsConfig.get('alignNonDecimal');
-		var replaceArg :{[key: string]: string} | undefined = wsConfig.get('replaceArg');
-		var trimTrail : boolean | undefined = wsConfig.get('trimTrail');
-		var formatHex : boolean | undefined = wsConfig.get('formatHex');
-		var padType : string | undefined = wsConfig.get('padType');
-
-		var config = new Config(
-			alignDecimal !== undefined ? alignDecimal : 'right', 
-			alignNonDecimal !== undefined ? alignNonDecimal : 'left', 
-			replaceArg !== undefined ? replaceArg : {},
-			trimTrail !== undefined? trimTrail : true,
-			formatHex !== undefined? formatHex : true,
-			padType !== undefined? padType : "space");
-
-		var editor = vscode.window.activeTextEditor;
-		
+export function activate(context: vscode.ExtensionContext): void {
+	const disposable = vscode.commands.registerCommand('alignargs.alignargs', async () => {
+		const editor = vscode.window.activeTextEditor;
 		if (!editor) {
-			return; // No open text editor
-		} else {
-			var selection = editor.selection;
-
-			var startPos = new vscode.Position(selection.start.line, 0);
-			var endPos = new vscode.Position(selection.end.line + 1, 0);
-
-			selection = new vscode.Selection(startPos,endPos);
-
-			var selectedText = editor.document.getText(selection);
-			var outputText = DoAlign(selectedText, config);
-
-			if(selectedText !== outputText){
-				editor.edit(editBuilder => editBuilder.replace(selection, outputText));
-			}
+			return;
 		}
+
+		const selection = expandSelectionToFullLines(editor);
+		const selectedText = editor.document.getText(selection);
+		const outputText = await DoAlign(editor.document, selection, getConfig());
+
+		if (!outputText || outputText === selectedText) {
+			return;
+		}
+
+		await editor.edit((editBuilder) => {
+			editBuilder.replace(selection, outputText);
+		});
 	});
 
 	context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate(): void {}
+
+function expandSelectionToFullLines(editor: vscode.TextEditor): vscode.Selection {
+	const startLine = editor.selection.start.line;
+	const endLine = editor.selection.end.line;
+
+	return new vscode.Selection(
+		new vscode.Position(startLine, 0),
+		editor.document.lineAt(endLine).range.end,
+	);
+}
+
+function getConfig(): Config {
+	const workspaceConfig = vscode.workspace.getConfiguration('alignargs');
+	const alignDecimal = workspaceConfig.get<string>('alignDecimal') ?? 'right';
+	const alignNonDecimal = workspaceConfig.get<string>('alignNonDecimal') ?? 'left';
+	const replaceArg = workspaceConfig.get<{ [key: string]: string }>('replaceArg') ?? {};
+	const trimTrail = workspaceConfig.get<boolean>('trimTrail') ?? true;
+	const formatHex = workspaceConfig.get<boolean>('formatHex') ?? true;
+	const padType = workspaceConfig.get<string>('padType') ?? 'space';
+
+	return new Config(alignDecimal, alignNonDecimal, replaceArg, trimTrail, formatHex, padType);
+}

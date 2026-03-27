@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { runTests } from 'vscode-test';
+import { downloadAndUnzipVSCode, runTests } from '@vscode/test-electron';
 
 async function main() {
 	try {
@@ -12,9 +12,20 @@ async function main() {
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
-		// Download VS Code, unzip it and run the integration test
-		await runTests({ extensionDevelopmentPath, extensionTestsPath });
-	} catch (err) {
+		const downloadedExecutablePath = await downloadAndUnzipVSCode({
+			version: '1.110.0',
+			extractSync: true,
+		});
+		const vscodeExecutablePath = process.platform === 'darwin'
+			? path.join(path.dirname(path.dirname(downloadedExecutablePath)), 'Resources', 'app', 'bin', 'code')
+			: downloadedExecutablePath;
+
+		await runTests({
+			vscodeExecutablePath,
+			extensionDevelopmentPath,
+			extensionTestsPath,
+		});
+	} catch {
 		console.error('Failed to run tests');
 		process.exit(1);
 	}
