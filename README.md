@@ -4,6 +4,12 @@ Align arguments in repeated single-line function calls so they are easy to scan 
 
 This extension is meant for the kind of code or text where you have several similar calls in a row and want to compare values quickly.
 
+## Release Status
+
+- Latest version: `1.0.1`
+- README and release notes were refreshed for the `1.0.1` release
+- Full version history is available in [CHANGELOG.md](./CHANGELOG.md)
+
 ## What It Does
 
 Turn this:
@@ -106,4 +112,6 @@ Automated tests currently cover:
 
 ## Release Notes
 
-See [CHANGELOG.md](./CHANGELOG.md) for version history.
+The `1.0.1` release refreshes the project documentation to match the current implementation and packaging flow.
+
+See [CHANGELOG.md](./CHANGELOG.md) for full version history.

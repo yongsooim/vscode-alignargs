@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.0.1]
+
+- Refresh README and release documentation for the 1.0.1 release
+- Keep the 1.0.0 parser, fallback, and language test coverage improvements intact
+
 ## [1.0.0]
 
 - Refresh dependencies and modernize the TypeScript, ESLint, and test toolchain

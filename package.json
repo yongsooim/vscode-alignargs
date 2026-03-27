@@ -3,7 +3,7 @@
 	"displayName": "Align Args",
 	"description": "Align arguments in single line function calls",
 	"icon": "images/alignargsIcon.png",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"engines": {
 		"vscode": "^1.110.0"
 	},
