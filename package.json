@@ -89,6 +89,7 @@
 		}
 	},
 	"scripts": {
+		"precompile": "node -e \"require('fs').rmSync('out', { recursive: true, force: true })\"",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint src --ext ts",
